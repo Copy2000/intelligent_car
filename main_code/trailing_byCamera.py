@@ -99,11 +99,13 @@ while (1):
     # 单看第100行的像素值（电脑端从下往上数第100行）
     color = dst[100]
     # 4.取一行像素点，找到最长白色段的中点
-    road_set = []               #存放该行白色段
-    road_set_length = []        #存放改行白色段对应长度
-    road = []                   #存放白色段
+    road_set = []           # 存放该行白色段
+    road_set_length = []    # 存放改行白色段对应长度
+    road = []               # 存放白色段
     for i in range(len(color)):
         if (i == 639):
+            road_set.append(road)
+            road_set_length.append(len(road))
             break
         if color[i] == 255 and color[i + 1] == 255:
             road.append(i)
@@ -113,12 +115,14 @@ while (1):
             road = []
     if (len(road_set_length) == 0):
         center = 320
+    elif (len(road) == 0):
+        center = 320
     else:
         index_ = road_set_length.index(max(road_set_length))
-        road = road_set[index_]                     #存放最长白色段
+        road = road_set[index_]
         center = (min(road) + max(road)) / 2
 
-# 5.目标中点与标准中点（320）进行比较得出偏移量
+    # 5.目标中点与标准中点（320）进行比较得出偏移量
 
     # 计算出center与标准中心点的偏移量
     # 如果为正，应该右转
@@ -126,26 +130,20 @@ while (1):
 
     print(direction)
 
-# 6.根据偏移量来控制小车左右轮的转速
-    threshold = 60  #目标中点与标准中点（320）进行比较得出偏移量大于此阈值才会发生转向
+    # 6.根据偏移量来控制小车左右轮的转速
+    threshold = 60  # 目标中点与标准中点（320）进行比较得出偏移量大于此阈值才会发生转向
     threshold_neg = -threshold
     if abs(direction) >= threshold:
         # 右转
         if direction > threshold:
             car_forward()
-            pwm1.ChangeDutyCycle(40 + direction / 12)
+            pwm1.ChangeDutyCycle(30 + direction / 12)
             pwm2.ChangeDutyCycle(0)
-            if (direction > 100):
-                time.sleep(0.5)
-
-
         # 左转
         elif direction < threshold_neg:
             car_forward()
             pwm1.ChangeDutyCycle(0)
-            pwm2.ChangeDutyCycle(40 + abs(direction) / 12)
-            if (abs(direction) > 100):
-                time.sleep(0.5)
+            pwm2.ChangeDutyCycle(30 + abs(direction) / 12)
 
     else:
         car_forward()
